@@ -10,7 +10,6 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.proto.ChassisSpeedsProto;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
@@ -21,18 +20,18 @@ import swervelib.math.SwerveMath;
 public class teleDrive extends Command {
   private final Swerve swerve;
   private final DoubleSupplier vX, vY;
-private final DoubleSupplier headingHorizontal, headingVertical;
+private final DoubleSupplier heading;
 private boolean initRotation = false;
 
-  public teleDrive(Swerve swerve, DoubleSupplier vX, DoubleSupplier vY, DoubleSupplier headingHorizontal, DoubleSupplier headingVertical) {
+  public teleDrive(Swerve swerve, DoubleSupplier vX, DoubleSupplier vY, DoubleSupplier heading) {
     this.swerve = swerve;
     this.vX = vX;
     this.vY = vY;
-    this.headingHorizontal = headingHorizontal;
-    this.headingVertical = headingVertical;
+    this.heading = heading;
 
     addRequirements(swerve);
   }
+    //TODO Auto-generated constructor stub
 
   // Called when the command is initially scheduled.
   @Override
@@ -44,20 +43,7 @@ private boolean initRotation = false;
   @Override
   public void execute() {
     //get the desired chassis speeds based on a 2 joystick module(one to drive, one to turn)
-    ChassisSpeeds desiredSpeeds = swerve.getTargetSpeeds(vX.getAsDouble(), vY.getAsDouble(), headingHorizontal.getAsDouble(), headingVertical.getAsDouble());
-
-    //prevent movement after auto
-    if (initRotation) {
-      if (headingHorizontal.getAsDouble() == 0 && headingHorizontal.getAsDouble() == 0) {
-        //get the current heading
-        Rotation2d firstLoopHeading = swerve.getHeading();
-
-        //set the current heading to the desired heading
-        desiredSpeeds = swerve.getTargetSpeeds(0, 0, firstLoopHeading.getSin(), firstLoopHeading.getCos());
-      }
-      //dont init rotation again
-      initRotation = false;
-    }
+    ChassisSpeeds desiredSpeeds = swerve.getTargetSpeeds(vX.getAsDouble(), vY.getAsDouble(), new Rotation2d(heading.getAsDouble() * Math.PI));
 
     // limit velocity to prevent the robot from deciding to pull a pitt pirates
     Translation2d translation = SwerveController.getTranslation2d(desiredSpeeds);
@@ -65,9 +51,9 @@ private boolean initRotation = false;
       translation, 
       swerve.getFieldVelocity(), 
       swerve.getPose(), 
-      Constants.LOOP_TIME, 
-      Constants.ROBOT_MASS, 
-      List.of(Constants.CHASSIS), 
+      Constants.loopTime, 
+      Constants.robotMass, 
+      List.of(Constants.chassis), 
       swerve.getSwerveDriveConfiguration());
       //put info to the smartDashboard
       SmartDashboard.putNumber("LimitedTranslation", translation.getX());

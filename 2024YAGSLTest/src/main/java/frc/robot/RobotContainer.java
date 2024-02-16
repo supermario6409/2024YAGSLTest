@@ -4,10 +4,22 @@
 
 package frc.robot;
 
-import frc.robot.Constants.OperatorConstants;
+import java.io.File;
+
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.teleDrive;
+import frc.robot.subsystems.Swerve;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -17,16 +29,33 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-
+  private final Swerve drivebase = new Swerve(new File(Filesystem.getDeployDirectory(), "swerve/neo"));
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+  //CommandJoystick driver = new CommandJoystick(0);
+  XboxController driver = new XboxController(0);
+
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
+
+    teleDrive closedTeleDrive = new teleDrive(
+    drivebase, 
+    () -> MathUtil.applyDeadband(driver.getLeftY(), OperatorConstants.leftYDeadzone), 
+    () -> MathUtil.applyDeadband(driver.getLeftX(), OperatorConstants.leftXDeadzone), 
+    () -> MathUtil.applyDeadband(driver.getRightX(), OperatorConstants.rightXDeadzone));
+   
+    Command driveFieldOrientedDirectAngle = drivebase.driveCommand(
+    () -> MathUtil.applyDeadband(driver.getLeftY(), OperatorConstants.leftYDeadzone), 
+    () -> MathUtil.applyDeadband(driver.getLeftX(), OperatorConstants.leftXDeadzone), 
+    () -> driver.getRawAxis(2));
   }
+
+  //apply deadbands and invert controls because joysticks are back-right positive whereas robots are front-left positive.
+  //left stick controls translation
+  //right stick controls angular velocity(turn speed)
+  
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -38,7 +67,8 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-  
+    new JoystickButton(driver, XboxController.Button.kY.value).onTrue(new InstantCommand(drivebase::zeroGyro));
+    
   }
 
   /**
