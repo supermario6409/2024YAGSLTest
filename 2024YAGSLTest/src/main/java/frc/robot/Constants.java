@@ -19,7 +19,7 @@ import swervelib.math.Matter;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static final double robotMass = 15; //mass in kilograms
+  public static final double robotMass = 31.751; //mass in kilograms
   public static final Matter chassis = new Matter(new Translation3d(0,0,Units.inchesToMeters(8)), robotMass);
   public static final double loopTime = 0.13; //20ms for the regular loop time + 110 ms for the spark max delay.
 

@@ -59,7 +59,7 @@ public class Swerve extends SubsystemBase {
     SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
     try{
       //works because we're supplying the conversion factor with a JSON file
-      swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed);
+      swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed, angleConversionFactor, driveConversionFactor);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -162,7 +162,7 @@ public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translat
 }
 
 //primary method for controlling the drivebase(basically the others are nice to have in case things go wrong)
-//this method is akin to the 2023 Atlas code, where a translation2d state and a rotaiton state are given and the modules are commanded accordingly.
+//this method is akin to the 2023 Atlas code, where a translation2d state and a rotation state are given and the modules are commanded accordingly.
 
 public void drive(Translation2d translation, double rotation, boolean fieldRelative) {
   swerveDrive.drive(
