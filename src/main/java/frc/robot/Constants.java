@@ -30,9 +30,15 @@ public final class Constants {
 
   public static final class DrivebaseConstants {
     //time motor spends paused in seconds on brake activation
-    public static final double brakeTime = 0;
+    public static final double brakeTime = 2;
     //speed modifier
-    public static final double speedMod = 0.6;
+    public static final double speedMod = 0.2;
+  }
+
+  public static final class SubsystemConstants {
+    public static final int leftClimber = 13;
+    public static final int rightClimber = 14;
+    public static final double climberSpeed = 0.2;
   }
 
   public static final class OperatorConstants {

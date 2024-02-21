@@ -22,8 +22,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.Climb;
 import frc.robot.commands.teleDrive;
+import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.Swerve;
 
 /**
@@ -35,10 +38,13 @@ import frc.robot.subsystems.Swerve;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Swerve drivebase = new Swerve(new File(Filesystem.getDeployDirectory(), "swerve"));
+  private final Climber c_Climber = new Climber();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   //CommandJoystick driver = new CommandJoystick(0);
   XboxController driver = new XboxController(0);
 
+  //test button
+  private final JoystickButton testButton = new JoystickButton(driver, XboxController.Button.kA.value);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -52,11 +58,11 @@ public class RobotContainer {
     () -> MathUtil.applyDeadband(driver.getRightX(), OperatorConstants.rightXDeadzone));
    
     Command driveFieldOrientedDirectAngle = drivebase.driveCommand(
-    () -> MathUtil.applyDeadband(driver.getLeftY(), OperatorConstants.leftYDeadzone), 
-    () -> MathUtil.applyDeadband(driver.getLeftX(), OperatorConstants.leftXDeadzone), 
-    () -> MathUtil.applyDeadband(driver.getRightX(), OperatorConstants.rightXDeadzone));
+    () -> MathUtil.applyDeadband(driver.getLeftY(), OperatorConstants.leftYDeadzone)*DrivebaseConstants.speedMod, 
+    () -> MathUtil.applyDeadband(driver.getLeftX(), OperatorConstants.leftXDeadzone)*DrivebaseConstants.speedMod, 
+    () -> MathUtil.applyDeadband(driver.getRightX(), OperatorConstants.rightXDeadzone)*DrivebaseConstants.speedMod);
 
-    drivebase.setDefaultCommand(driveFieldOrientedDirectAngle);
+    //drivebase.setDefaultCommand(driveFieldOrientedDirectAngle);
   }
 
   //apply deadbands and invert controls because joysticks are back-right positive whereas robots are front-left positive.
@@ -75,7 +81,7 @@ public class RobotContainer {
    */
   private void configureBindings() {
     new JoystickButton(driver, XboxController.Button.kY.value).onTrue(new InstantCommand(drivebase::zeroGyro));
-  
+    testButton.whileTrue(new Climb(c_Climber));
   }
 
   /**
